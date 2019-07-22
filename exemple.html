@@ -1,0 +1,144 @@
+<script src="jquery.js"></script>
+
+
+<script>
+
+var divTimer;
+var initBloc;
+
+$(document).ready(function(){
+
+    divTimer = $("#modeleTimer");
+    $("input[type='button']",divTimer).data("compteurLance",false);
+
+
+    initBloc = mkClosureV2();
+    $("#createur").data("nbTimers",0).click(
+        function()
+        {
+            var nbTimers = $("#createur").data("nbTimers") + 1;
+            $(this).data("nbTimers", nbTimers);
+            initBloc(nbTimers);
+
+        }
+    );
+
+
+    $(".lanceur").click(
+        function()
+        {
+            var refBloc = $(this).parent();
+            if( $(this).data("compteurLance") == false) {
+
+                var initChrono = parseInt($("input[type='number']", refBloc).val()) + 1;
+                if( initChrono > 0) {
+                    var decrementeur = mkClosure(initChrono,refBloc);
+
+                    decrementeur();
+                    var chrono = setInterval(decrementeur, 1000);
+
+                    $(this).data("compteurLance", true);
+                    refBloc.data("fonctionChrono",chrono);
+                    $(this).val("Reinitialiser le decompte");
+                }
+            }
+            else
+            {
+                $(this).data("compteurLance",false);
+                $(this).val("Lancer le decompte");
+                $(".texteTimer",refBloc).html("En attente du signal de lancement ...");
+
+                clearInterval(refBloc.data("fonctionChrono"));
+            }
+        }
+    );
+});
+
+
+// décrémenter
+function mkClosure(nbSecondes,refBloc){
+	return function(){
+		nbSecondes--;
+		//console.log("Temps restant : " + nbSecondes);
+		if( nbSecondes > 0)
+        {
+            $(".texteTimer",refBloc).html("Temps restant : " + nbSecondes + " secondes.");
+
+        }
+        else
+        {
+            clearInterval(refBloc.data("fonctionChrono"));
+            $("input[type='button']",refBloc).data("compteurLance",false).val("Lancer le decompte");;
+            $(".texteTimer",refBloc).html("Termin&eacute; ! Cliquer sur le bouton pour recommencer.");
+        }
+
+	};
+}
+
+
+// créer un bloc
+function mkClosureV2()
+{
+    return function(numTimer)
+    {
+        var nouveauTimer = divTimer.clone(true).removeAttr("id").show();
+        $(".legend",nouveauTimer).html("Chrono " + numTimer);
+        $("body").append(nouveauTimer);
+    };
+}
+
+
+</script>
+
+<style>
+    .timer
+    {
+        border : 1px solid black;
+        width : 200px;
+        height : 200px;
+        text-align: center;
+        margin: 20px;
+        float:left;
+        position:relative;
+    }
+
+    .texteTimer
+    {
+        border-top : 1px solid black;
+        margin-top : 10px;
+    }
+
+    #modeleTimer
+    {
+        display:none;
+    }
+
+    .legend
+    {
+        background-color: lightgrey;
+        margin-bottom : 5px;
+    }
+
+    body
+    {
+        margin-top:20px;
+    }
+
+    #createur
+    {
+        position:absolute;
+        top:0px;left:0px;
+    }
+
+</style>
+
+<body>
+<input id="createur" type="button" value="Creer un nouveau chrono" />
+<div id="modeleTimer" class="timer">
+    <div class="legend">Legende</div>
+    <input type="number" value="10" />
+    <input class="lanceur" type="button" value="Lancer le decompte"/>
+    <div class="texteTimer">En attente du signal de lancement ...</div>
+</div>
+</body>
+
